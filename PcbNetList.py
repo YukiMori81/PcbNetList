@@ -141,7 +141,6 @@ def CCF_Read(rfname, wfname = 'NET.TXT') :
         f.write(line)
         line = line.replace('\n', '')       #改行削除
         line = line.replace('\r', '')       #改行削除
-        #print(line)
 
         if n == 0 :                         #ネット名前を記憶
             words = line.split(':', 1)
@@ -151,8 +150,12 @@ def CCF_Read(rfname, wfname = 'NET.TXT') :
             else :
                 words = []
         else :
-            words = (line.strip()).split(',')
-        #print(words)           
+            line = line.strip()
+            if line.startswith(',') :
+                line = line.lstrip(',')
+            words = line.split(',')
+            #words = (line.strip()).split(',')
+        #print(n, line, words)        
 
         if len(words) > 0 :                 #ネットが存在する時
             w = words[-1].strip() 
@@ -171,8 +174,10 @@ def CCF_Read(rfname, wfname = 'NET.TXT') :
                 #print(name)
                 #print(net)
                 #print()
-            else :
-                EOF = 1
+            else :                          #最後の文字が''でも';'でもない時（','が次の行の先頭にある場合）
+                for w in words :            #ネットを記憶
+                    net.append(w.strip())
+                EOF = 0
         else :
             EOF = 1
 
