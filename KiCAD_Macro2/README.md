@@ -13,7 +13,8 @@
 
 
 ## Ｃ.動作確認環境
-+ KiCAD Ver4.07 on Windows7-64bit　/ Ubuntu14.04LTS-64bit  
++ KiCAD Ver4.07 on Windows7-64bit　/ Ubuntu14.04LTS-64bit
++ KiCAD Ver6.02 on Windows10-64bit  
 
 
 ## Ｄ.使用方法
@@ -33,7 +34,7 @@
 2. このファイルを、KiCadのこれから編集する基板設計フォルダーへ、コピーする。
 3. Pcbnewを起動し、Pythonコンソールを選択実行する。　
 4. コンソール内で、「pwd」を実行し、出てきたフォルダ（普通は"C:\Program Files\KiCad")へ、本ソフト **"Any2Kicad.py"と上のフォルダにある"PcbNetList.py"** をコピーする。
-5. コンソール内で、「execfile("Any2Kicad.py")」と入力、実行する。
+5. コンソール内で、「execfile("Any2Kicad.py")」(KiCAD Ver.5まで)、「exec(open("Any2Kicad.py").read())」(KiCAD Ver.6)と入力、実行する。
 6. Pcbnew用ネットリスト（自動的に「プロジェクト名」+ ".net"に設定）ファイルが生成される。尚、生成されたファイルは、部品パッドが各部品最大ピン数のピンヘッダやQFPパッケージを自動的に割り当てられる。
 7. そのネットリストをインポートします。　その後、部品パッドを変更すれば、基板設計できます。
 8. 上記7までの方法は部品一品毎に変更なので部品が多いと面倒です。それで、部番と部品パッド情報をcsvファイルで用意できれば、それを使っても、KiCAD用ネットリストを作成できます。  
@@ -53,6 +54,13 @@
 
 
 ## Ｇ.変更履歴 
+---
+2022/05/10   (9th commit)
+
++KiCAD Ver.6でPythonのバージョンが上がって動作しなくなった不具合を修正
++本README.mdの使用方法（D.5）をKiCAD Ver.6用の記載を追加
++CCFフォーマットで、行頭が","（カンマ）で始まる場合の不具合を修正
+
 ---
 2018/09/22   (8th commit)  
 
