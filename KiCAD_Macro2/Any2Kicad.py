@@ -55,10 +55,10 @@ def Cmp_Read(rfname) :
                 continue
             elif line[0:7] == 'Path = ' :
                 Pth = line[7:]
-		if Pth[0] == '/' :
-		    Pth = Pth[1:]
-                continue
-                  
+                if Pth[0] == '/' :
+                    Pth = Pth[1:]
+                    continue
+                
     return data
 
 
@@ -110,8 +110,8 @@ def Kicad_Write(netlist, wfname = 'kicad.net', rfname = '') :
         #"C1","C_Small","Capacitors_SMD:C_0603_HandSoldering",""
         #"R1","R_Small","Resistors_SMD:R_0603_HandSoldering",""
         #"L1","L_Small","Inductors_SMD:L_0603_HandSoldering",""
-      
-	#csvファイルから部品情報を読み取る
+    
+    #csvファイルから部品情報を読み取る
         data = []
         with open(rfname, 'r') as fcsv:
             reader = csv.reader(fcsv)       # readerオブジェクトを作成
@@ -124,13 +124,13 @@ def Kicad_Write(netlist, wfname = 'kicad.net', rfname = '') :
 
         #print(data)
 
-	#部品情報データを書き込む
+    #部品情報データを書き込む
         data_n = len(data); data_n -= 1
         for i, w in enumerate(data) :
             value =  w[1].decode('utf8')
             j = value.find('(')		    #　value値にある"("以降の文字列削除
             if j >= 0 :
-	        value = value[0:j]
+                value = value[0:j]
             f.write("  (components\n")
             f.write('    (comp (ref {0:s})\n'.format( w[0].decode('utf8') ))
             f.write('      (value {0:s})\n'.format( value ))
@@ -143,22 +143,22 @@ def Kicad_Write(netlist, wfname = 'kicad.net', rfname = '') :
             f.write("\n")
     
     else :
-	#コンポーネンツファイルが存在するならば、データを読み取る
-	cmp = []
-	cfname = wfname.replace('.net','.cmp')
-	if os.path.isfile(cfname) :
-	    cmp = Cmp_Read(cfname)
+    #コンポーネンツファイルが存在するならば、データを読み取る
+        cmp = []
+        cfname = wfname.replace('.net','.cmp')
+        if os.path.isfile(cfname) :
+            cmp = Cmp_Read(cfname)
 
-	#コンポーネンツファイルの「Path」の最大値を求める
-	ptn_max = 0
-	for w in cmp :
-	    i = int(w[4], 16)
-	    if i >= TSTAMP_OFFSET :
-		i -= TSTAMP_OFFSET		#オフセット値を引く
-	    if i > ptn_max :
-		ptn_max = i
+        #コンポーネンツファイルの「Path」の最大値を求める
+        ptn_max = 0
+        for w in cmp :
+            i = int(w[4], 16)
+            if i >= TSTAMP_OFFSET :
+                i -= TSTAMP_OFFSET		#オフセット値を引く
+            if i > ptn_max :
+                ptn_max = i
 
-	#ネットリストから使われている部番を調べる
+    #ネットリストから使われている部番を調べる
         data = []
         for net in netlist[1] :
             for w in net :
@@ -166,59 +166,59 @@ def Kicad_Write(netlist, wfname = 'kicad.net', rfname = '') :
                 if (words[0] in data) == False :
                     data.append(words[0])
 
-	#各部番の部品情報データを書き込む
-	dfp_n = 0
+    #各部番の部品情報データを書き込む
+        dfp_n = 0
         data.sort()
         data_n = len(data); data_n -= 1
         for i, w in enumerate(data) :
 
-	    #部番wがコンポーネンツデータがあるならば、そのデータを使って処理
-	    cmpf = False
-	    for w1 in cmp :
-		if w1[0] == w :
-		    cmpf = True    
-		    #コンポーネンツデータで部品情報データを書き込む            
-        	    f.write("  (components\n")
-            	    f.write('    (comp (ref {0:s})\n'.format(w1[0]))
-            	    f.write('      (value "{0:s}")\n'.format(w1[1]))
+            #部番wがコンポーネンツデータがあるならば、そのデータを使って処理
+            cmpf = False
+            for w1 in cmp :
+                if w1[0] == w :
+                    cmpf = True    
+            #コンポーネンツデータで部品情報データを書き込む            
+                    f.write("  (components\n")
+                    f.write('    (comp (ref {0:s})\n'.format(w1[0]))
+                    f.write('      (value "{0:s}")\n'.format(w1[1]))
                     f.write('      (footprint "{0:s}")\n'.format(w1[2]))
-            	    f.write('      (libsource (lib device) (part ""))\n')           
+                    f.write('      (libsource (lib device) (part ""))\n')           
                     #f.write('      (sheetpath (names /) (tstamps /{0:s}))\n'.format(w1[3]))            
                     f.write('      (sheetpath (names /) (tstamps /))\n')            
                     f.write('      (tstamp {0:s}))'.format(w1[4]))     
-            	    if i >= data_n :
-                	f.write(")")
-            	    f.write("\n")
-		    break
-	    if cmpf :
-		continue 
+                    if i >= data_n :
+                        f.write(")")
+                    f.write("\n")
+                    break
+            if cmpf :
+                continue 
 
-	    #以降、コンポーネンツデータが無かった場合
-	    #ネットリストから部品情報を作る処理
-	    dfp_n += 1
+            #以降、コンポーネンツデータが無かった場合
+            #ネットリストから部品情報を作る処理
+            dfp_n += 1
 
-	    #部番wの最大ピン数を調べる
+            #部番wの最大ピン数を調べる
             pin_max = 1; pin_cnt = 0
             for net in netlist[1] :
                 for w1 in net :
                     words = w1.split("(")
                     if words[0] == w :		#部品番号が一致した場合ピン数をアップカウント
-			pin_cnt += 1
-			w2 = words[1].rstrip(")")
-			if w2.isdigit() :	#ピン番号が数字の場合
+                        pin_cnt += 1
+                        w2 = words[1].rstrip(")")
+                        if w2.isdigit() :	#ピン番号が数字の場合
                             pin = int(w2)
-			else :			#ピン番号をカウントしたピン数にする
-			    pin = pin_cnt
+                        else :			#ピン番号をカウントしたピン数にする
+                            pin = pin_cnt
 
                         if pin > pin_max :
                             pin_max = pin
 
-	    #最大ピン数から、ピンヘッダやQFPとして部品情報データを書き込む            
+            #最大ピン数から、ピンヘッダやQFPとして部品情報データを書き込む            
             f.write("  (components\n")
             f.write('    (comp (ref {0:s})\n'.format(w))
             f.write('      (value "{0:s}:{1:d}")\n'.format(w.rstrip("0123456789"), pin_max))
             if pin_max <= 40 :
-                f.write('      (footprint "Pin_Headers:Pin_Header_Straight_1x{0:0>2d}_Pitch2.54mm")\n'.format(pin_max))
+                f.write('      (footprint "Connector_PinHeader_1.00mm:PinHeader_1x{0:0>2d}_P1.00mm_Vertical")\n'.format(pin_max))
             elif pin_max <= 80 :
                 f.write('      (footprint "Pin_Headers:Pin_Header_Straight_2x{0:0>2d}_Pitch2.54mm")\n'.format(pin_max//2 + pin_max%2))
             elif pin_max <= 100 :
@@ -255,7 +255,7 @@ def Kicad_Write(netlist, wfname = 'kicad.net', rfname = '') :
 
             f.write("\n")
             
-           
+        
     f.close()
 
 
@@ -317,9 +317,9 @@ try:
 
     #KiCADネットリストを部品情報付で出力する
     #部品情報自動作成（部品パッドを自動的にピンヘッダー）する場合
-    #Kicad_Write(net, pcb_file.replace('.kicad_pcb','.net'))
+    Kicad_Write(net, pcb_file.replace('.kicad_pcb','.net'))
     #部品情報（パーツリスト）をcsvファイルで指定する場合
-    Kicad_Write(net, pcb_file.replace('.kicad_pcb','.net'), 'partlist.csv')
+    #Kicad_Write(net, pcb_file.replace('.kicad_pcb','.net'), 'partlist.csv')
 
     #処理完了表示
     print("OK! Conversion complete(net:%d)\n" % len(net[0]))
