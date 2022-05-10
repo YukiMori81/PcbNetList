@@ -112,7 +112,7 @@ def Calay_Write(netlist, wfname = 'calay.net') :
                 f.write(",\n                    \t")
             else :
                 f.write(" ")          
-           
+        
     f.close()
 
 
@@ -141,7 +141,6 @@ def CCF_Read(rfname, wfname = 'NET.TXT') :
         f.write(line)
         line = line.replace('\n', '')       #改行削除
         line = line.replace('\r', '')       #改行削除
-        #print(line)
 
         if n == 0 :                         #ネット名前を記憶
             words = line.split(':', 1)
@@ -151,8 +150,12 @@ def CCF_Read(rfname, wfname = 'NET.TXT') :
             else :
                 words = []
         else :
-            words = (line.strip()).split(',')
-        #print(words)           
+            line = line.strip()
+            if line.startswith(',') :
+                line = line.lstrip(',')
+            words = line.split(',')
+            #words = (line.strip()).split(',')
+        #print(n, line, words)        
 
         if len(words) > 0 :                 #ネットが存在する時
             w = words[-1].strip() 
@@ -171,8 +174,10 @@ def CCF_Read(rfname, wfname = 'NET.TXT') :
                 #print(name)
                 #print(net)
                 #print()
-            else :
-                EOF = 1
+            else :                          #最後の文字が''でも';'でもない時（','が次の行の先頭にある場合）
+                for w in words :            #ネットを記憶
+                    net.append(w.strip())
+                EOF = 0
         else :
             EOF = 1
 
@@ -222,7 +227,7 @@ def CCF_Write(netlist, wfname = 'ccf.net') :
                 f.write(",\n                    ")
             else :
                 f.write(",")
-                       
+                    
     f.close()
 
 
@@ -271,7 +276,7 @@ def DKS_Read(rfname, wfname = 'NET.TXT') :
                 for w in words :            #ネットを記憶
                     w = w.strip()
                     if len(w) > 0 :
-                	w = w.replace('-', '(', 1) + ')'                   
+                        w = w.replace('-', '(', 1) + ')'                   
                         net.append(w)
                 EOF = 0
             elif w[-1] == ']' :             #最後の文字が']'の時
@@ -279,7 +284,7 @@ def DKS_Read(rfname, wfname = 'NET.TXT') :
                 for w in words :            #ネットを記憶
                     w = w.strip()                   
                     if len(w) > 0 :
-                	w = w.replace('-', '(', 1) + ')'                   
+                        w = w.replace('-', '(', 1) + ')'                   
                         net.append(w)
                 EOF = 1
                 #print(name)
@@ -335,7 +340,7 @@ def DKS_Write(netlist, wfname = 'dks.net') :
                 f.write(",\n                    ")
             else :
                 f.write(",")
-                       
+                    
     f.close()
 
 
@@ -386,7 +391,7 @@ def MM2_Read(rfname, wfname = 'NET.TXT') :
                 line = line[1:]
             words = (line.strip()).split(',')
         #print(words)           
- 
+
         if len(words) > 0 :                 #ネットが存在する時
             w = words[-1] 
             if w == '' :                    #最後が','の時
@@ -394,14 +399,14 @@ def MM2_Read(rfname, wfname = 'NET.TXT') :
                 for w in words :            #ネットを記憶
                     w = w.strip()                   
                     if len(w) > 0 :
-                	w = w.replace('-', '(', 1) + ')'                   
+                        w = w.replace('-', '(', 1) + ')'                   
                         net.append(w)
                 EOF = 0
             else :
                 for w in words :            #ネットを記憶
                     w = w.strip()                   
                     if len(w) > 0 :
-                	w = w.replace('-', '(', 1) + ')'                   
+                        w = w.replace('-', '(', 1) + ')'                   
                         net.append(w)
                 EOF = 1
                 #print(name)
@@ -507,9 +512,9 @@ def Telesis_Read(rfname, wfname = 'NET.TXT') :
             else :
                 words = []
         else :                              #前のネットの続き
-           words = re.split(" +", line.strip())      #１行をスペースで分離
+            words = re.split(" +", line.strip())      #１行をスペースで分離
         #print(words)           
- 
+
         if len(words) > 0 :                 #ネットが存在する時
             w = words[-1] 
             if w[-1] == ',' :               #最後の文字が','の時
@@ -653,7 +658,7 @@ def PADS_Read(rfname, wfname = 'NET.TXT') :
                 for w in words :            #ネットを記憶
                     w = w.strip()                   
                     if len(w) > 0 :
-                	w = w.replace('.', '(', 1) + ')'                   
+                        w = w.replace('.', '(', 1) + ')'                   
                         net.append(w)
                 EOF = 0
             else :
@@ -680,7 +685,7 @@ def PADS_Read(rfname, wfname = 'NET.TXT') :
                 #print(name)
                 #print(net)
                 #print()
-                              
+                            
             net = []; name = ''
     
         f.write(line); f.write('\n')
@@ -715,7 +720,7 @@ def PADS_Write(netlist, wfname = 'pads.net', rfname = '') :
     if rfname != '' :
         import csv
         #Reference, Value, Footprint
-      
+    
         data = []
         with open(rfname, 'r') as fcsv:
             reader = csv.reader(fcsv)       # readerオブジェクトを作成
@@ -744,7 +749,7 @@ def PADS_Write(netlist, wfname = 'pads.net', rfname = '') :
         f.write("*PART*       ITEMS\n")
         for i, w in enumerate(data) :
             f.write('{0:15s}  ""\n'.format( w ))
-           
+        
 
     f.write("*NET*\n")
     name_n = len(netlist[0]); name_n -= 1
@@ -811,7 +816,7 @@ def Intergra_Read(rfname, wfname = 'NET.TXT') :
                 for w in words[1:] :        #ネットを記憶
                     w = w.strip()                   
                     if len(w) > 0 :
-                	w = w.replace('-', '(', 1) + ')'                   
+                        w = w.replace('-', '(', 1) + ')'                   
                         net.append(w)
             else :                          #新しいネット名前
                 if n > 0 and name != '' and len(net) > 0 : #前のネットを登録
@@ -825,13 +830,13 @@ def Intergra_Read(rfname, wfname = 'NET.TXT') :
                     #print(name)
                     #print(net)
                     #print()
-               
+            
                 name = words[0].strip()     #新しいネット名前を記憶
                 net = []
                 for w in words[1:] :        #新しいネットを記憶
                     w = w.strip()                   
                     if len(w) > 0 :
-                	w = w.replace('-', '(', 1) + ')'                   
+                        w = w.replace('-', '(', 1) + ')'                   
                         net.append(w)
                     
                 n += 1
@@ -871,7 +876,7 @@ def Intergra_Write(netlist, wfname = 'intergra.net', rfname = '') :
     if rfname != '' :
         import csv
         #Reference, Value, Footprint
-     
+    
         data = []
         with open(rfname, 'r') as fcsv:
             reader = csv.reader(fcsv)       # readerオブジェクトを作成
@@ -903,7 +908,7 @@ def Intergra_Write(netlist, wfname = 'intergra.net', rfname = '') :
         f.write("%PART\n")
         for i, w in enumerate(data) :
             f.write('""              {0:s}\n'.format( w ))
-           
+        
         
     name_n = len(netlist[0]); name_n -= 1
     f.write("%NET\n")   
@@ -981,10 +986,10 @@ def Cmp_Read(rfname) :
                 continue
             elif line[0:7] == 'Path = ' :
                 Pth = line[7:]
-		if Pth[0] == '/' :
-		    Pth = Pth[1:]
+                if Pth[0] == '/' :
+                    Pth = Pth[1:]
                 continue
-                  
+                
     return data
 
 
@@ -1071,7 +1076,7 @@ def Kicad_Read(rfname, wfname = 'NET.TXT') :
                         #print()
 
                     name = ''; net = []
-           
+        
     f.close()
     return (netname, netlist, rfname) 
 
@@ -1092,7 +1097,7 @@ def Kicad_Write(netlist, wfname = 'kicad.net', rfname = '') :
         #"C1","C_Small","Capacitors_SMD:C_0603_HandSoldering",""
         #"R1","R_Small","Resistors_SMD:R_0603_HandSoldering",""
         #"L1","L_Small","Inductors_SMD:L_0603_HandSoldering",""
-      
+    
         data = []
         with open(rfname, 'r') as fcsv:
             reader = csv.reader(fcsv)       # readerオブジェクトを作成
@@ -1181,7 +1186,7 @@ def Kicad_Write(netlist, wfname = 'kicad.net', rfname = '') :
 
             f.write("\n")
             
-           
+        
     f.close()
 
 
@@ -1220,10 +1225,10 @@ def D356_Read(rfname, wfname = 'NET.TXT') :
     data = []
     for line in open(rfname, 'r'):
         f.write(line)
- 
-	if len(line) <= 27 :
-	    continue
-      
+
+        if len(line) <= 27 :
+            continue
+    
         if line[0] == '3' and line[2] == '7' and line[26] == '-':
             line = line.replace('\n', '')   #改行削除
             line = line.replace('\r', '')   #改行削除
